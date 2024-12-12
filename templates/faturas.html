@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="resumo">
+    <div class="period">
+        <p>Cartão: {{ nome_cartao }}</p>
+    </div>
+
+    <div class="totals">
+        <ul class="totals-list">
+            <li>Limite Total: 
+                <span class="period">
+                    <div class="nav-buttons">
+                        <form method="POST" action="/atualizar_limite/{{ cartao_id }}" style="display: inline;">
+                            <input type="number" id="limite_total" name="limite_total" step="0.01" value="{{ limite_total }}" required placeholder="Novo Limite" style="width: 150px; margin-right: 10px;">
+                            <button type="submit" class="button secondary">Confirmar</button>
+                        </form>
+                    </div>
+                </span>
+            </li>
+        </ul>
+    </div>
+</section>
+
+<!-- Botão Inserir Fatura -->
+<div class="button-container">
+    <a href="/incluir_fatura/{{ cartao_id }}" class="button">Inserir Fatura</a>
+</div>
+
+<!-- Tabela de Faturas -->
+<section id="grid">
+    <table>
+        <thead>
+            <tr>
+                <th>Mês</th>
+                <th>Ano</th>
+                <th>Dia de Vencimento</th>
+                <th>Valor</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for fatura in faturas %}
+            <tr>
+                <td>{{ fatura['mes'] }}</td>
+                <td>{{ fatura['ano'] }}</td>
+                <td>{{ fatura['dia_vencimento'] }}</td>
+                <td>{{ fatura['valor'] | format_currency }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="dashboard">
+
+    <!-- Resumo de Contas -->
+    <section class="resumo">
+        <h2>Contas</h2>
+        <div class="totals">
+            <ul class="totals-list">
+                <li>Total Não Pago: <span>{{ total_nao_pago | default(0) | format_currency }}</span></li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- Resumo dos Cartões -->
+    <section class="resumo">
+        <h2>Cartões de Crédito</h2>
+        <div class="totals">
+            <ul class="totals-list">
+                <li>Limite Restante: <span>{{ limite_restante | default(0) | format_currency }}</span></li>
+            </ul>
+        </div>
+    </section>
+</section>
+{% endblock %}

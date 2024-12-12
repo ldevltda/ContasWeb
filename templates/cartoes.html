@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="resumo">
+    <div class="totals">
+        <ul class="totals-list">
+            <li>Total Limite: <span>{{ total_limite | format_currency }}</span></li>
+            <li>Limite Utilizado: <span>{{ limite_utilizado | format_currency }}</span></li>
+            <li>Limite Restante: <span>{{ limite_restante | format_currency }}</span></li>
+        </ul>
+    </div>
+</section>
+
+<section id="grid" class="grid-container">
+    <table>
+        <thead>
+            <tr>
+                <th class="icon-column"></th>
+                <th class="icon-column"></th>
+                <th>Nome</th>
+                <th>Limite Total</th>
+                <th>Limite Utilizado</th>
+                <th>Limite Restante</th>
+            </tr>
+        </thead>
+        <tbody id="grid-body">
+            {% for cartao in cartoes %}
+            <tr data-id="{{ cartao['id'] }}">
+                <td class="icon-column">
+                    <a href="/faturas/{{ cartao['id'] }}" class="icon">✏️</a>
+                </td>
+                <td class="icon-column">
+                    <a href="/confirmar_exclusao_cartao/{{ cartao['id'] }}" class="icon">🗑️</a>
+                </td>
+                <td>{{ cartao['nome'] }}</td>
+                <td>{{ cartao['limite_total'] | format_currency }}</td>
+                <td>{{ cartao['limite_utilizado'] | format_currency }}</td>
+                <td>{{ cartao['limite_restante'] | format_currency }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+{% endblock %}

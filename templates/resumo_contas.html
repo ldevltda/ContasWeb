@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="resumo">
+    <div class="period">
+        <p>Período: {{ mes }}/{{ ano }}</p>
+        <div class="nav-buttons">
+            <form action="/resumo" method="get" style="display: inline;">
+                <input type="hidden" name="mes" value="{{ mes|int - 1 if mes|int > 1 else 12 }}">
+                <input type="hidden" name="ano" value="{{ ano|int - 1 if mes|int == 1 else ano }}">
+                <button type="submit">&lt; Anterior</button>
+            </form>
+            <form action="/resumo" method="get" style="display: inline;">
+                <input type="hidden" name="mes" value="{{ mes|int + 1 if mes|int < 12 else 1 }}">
+                <input type="hidden" name="ano" value="{{ ano|int + 1 if mes|int == 12 else ano }}">
+                <button type="submit">Próximo &gt;</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="totals">
+        <ul class="totals-list">
+            <li>Total de Contas: <span>{{ total_contas }}</span></li>
+            <li>Total Valor: <span>{{ total_valor | format_currency }}</span></li>
+            <li>Total Pago: <span>{{ total_pago | format_currency }}</span></li>
+            <li>Total Não Pago: <span>{{ total_nao_pago | format_currency }}</span></li>
+            <li>Total Vencido: <span>{{ total_vencido | format_currency }}</span></li>
+        </ul>
+    </div>
+
+    <div class="button-container">
+        <a href="/incluir" id="incluir-conta-btn" class="button">Incluir Conta</a>
+    </div>
+</section>
+
+<section id="grid">
+    <table>
+        <thead>
+            <tr>
+                <th class="icon-column"></th>
+                <th class="icon-column"></th>
+                <th class="icon-column"></th>
+                <th>Descrição</th>
+                <th>Valor</th>
+                <th>Vencimento</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody id="grid-body">
+            {% for conta in contas %}
+            <tr data-id="{{ conta['id'] }}">
+                <td class="icon-column">
+                    <a href="/editar/{{ conta['id'] }}" class="icon">
+                        ✏️
+                    </a>                    
+                </td>
+                <td class="icon-column">
+                    <a href="#" class="icon" data-id="{{ conta['id'] }}" data-status="{{ conta['status'] }}" onclick="marcarStatus(this)">
+                        {% if conta['status'] == 'pago' %} ↩️ {% else %} 💵 {% endif %}
+                    </a>                    
+                </td>
+                <td class="icon-column">
+                    <a href="/confirmar_exclusao/{{ conta['id'] }}" class="icon">
+                        🗑️
+                    </a>                    
+                </td>
+                <td>{{ conta['descricao'] }}</td>
+                <td>{{ conta['valor'] | format_currency }}</td>
+                <td>{{ conta['vencimento'] }}</td>
+                <td>{{ conta['status'] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+
+<script>
+    function marcarStatus(element) {
+        const id = element.dataset.id;
+    
+        fetch(`/marcar/${id}`, { method: 'POST' })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Erro na requisição.');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.novo_status) {
+                    // Atualiza o ícone de status
+                    element.dataset.status = data.novo_status;
+                    element.innerHTML = data.novo_status === 'pago' ? '↩️' : '💵';
+    
+                    // Atualiza o resumo e o grid
+                    atualizarResumo();
+                } else {
+                    alert(data.message || 'Erro ao atualizar o status.');
+                }
+            })
+            .catch(error => {
+                console.error('Erro ao atualizar o status:', error);
+                alert('Erro ao atualizar o status.');
+            });
+    }
+    
+    function atualizarResumo() {
+    fetch('/api/atualizar_resumo')
+        .then(response => response.json())
+        .then(data => {
+            if (data.resumo) {
+                document.querySelector('.totals-list').innerHTML = `
+                    <li>Total de Contas: <span>${data.resumo.total_contas}</span></li>
+                    <li>Total Valor: <span>R$ ${parseFloat(data.resumo.total_valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></li>
+                    <li>Total Pago: <span>R$ ${parseFloat(data.resumo.total_pago).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></li>
+                    <li>Total Não Pago: <span>R$ ${parseFloat(data.resumo.total_nao_pago).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></li>
+                    <li>Total Vencido: <span>R$ ${parseFloat(data.resumo.total_vencido).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></li>
+                `;
+
+                // Atualiza o grid
+                const gridBody = document.querySelector('#grid-body');
+                gridBody.innerHTML = data.contas.map(conta => `
+                    <tr>
+                        <td>
+                            <a href="#" class="icon" data-id="${conta.id}" data-status="${conta.status}" onclick="marcarStatus(this)">
+                                ${conta.status === 'pago' ? '↩️' : '💵'}
+                            </a>
+                            <a href="/editar/${conta.id}" class="icon">✏️</a>
+                            <a href="/confirmar_exclusao/${conta.id}" class="icon">🗑️</a>
+                        </td>
+                        <td>${conta.descricao}</td>
+                        <td>R$ ${parseFloat(conta.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+                        <td>${conta.vencimento}</td>
+                        <td>${conta.status}</td>
+                    </tr>
+                `).join('');
+            }
+        })
+        .catch(error => {
+            console.error('Erro ao atualizar resumo e grid:', error);
+        });
+    }
+</script>
+{% endblock %}

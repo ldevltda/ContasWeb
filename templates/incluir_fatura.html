@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="form-container">
+    <h2>Incluir Fatura</h2>
+    <form method="POST" action="/incluir_fatura/{{ cartao_id }}" class="form-content">
+        <div class="form-group">
+            <label for="mes">Mês:</label>
+            <input type="number" id="mes" name="mes" min="1" max="12" placeholder="Ex: 12" required>
+        </div>
+
+        <div class="form-group">
+            <label for="ano">Ano:</label>
+            <input type="number" id="ano" name="ano" min="2000" max="2100" placeholder="Ex: 2024" required>
+        </div>
+
+        <div class="form-group">
+            <label for="dia_vencimento">Dia de Vencimento:</label>
+            <input type="number" id="dia_vencimento" name="dia_vencimento" min="1" max="31" placeholder="Ex: 15" required>
+        </div>        
+
+        <div class="form-group">
+            <label for="valor">Valor:</label>
+            <input type="number" id="valor" name="valor" step="0.01" placeholder="Digite o valor (ex: 100.50)" required>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="button">Adicionar</button>
+            <a href="/cartoes" class="button secondary">Voltar</a>
+        </div>
+    </form>
+</section>
+{% endblock %}

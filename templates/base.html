@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="icon" type="image/x-icon" href="static/favicon.ico">
+    <style>
+        /* Reset global */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #ffffff;
+        }
+
+        /* Header */
+        header {
+            width: 100%;
+            background-color: #4caf50;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+
+        .menu-toggle {
+            font-size: 20px;
+            cursor: pointer;
+            color: white;
+            margin-right: 10px;
+            background: none;
+            border: none;
+            position: relative;
+        }
+
+        .logo {
+            height: 40px;
+        }
+
+        .logout-button {
+            text-decoration: none;
+            color: white;
+            background-color: #383132;
+            padding: 8px 15px;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+
+        .logout-button:hover {
+            background-color: #000000;
+        }
+
+        /* Sidebar (menu expansível) */
+        .sidebar {
+            height: 100vh;
+            width: 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: #4caf50;
+            color: white;
+            overflow-x: hidden;
+            transition: 0.3s ease;
+            padding-top: 70px;
+        }
+
+        .sidebar.active {
+            width: 220px;
+        }
+
+        .menu-link {
+            text-decoration: none;
+            color: white;
+            padding: 10px 20px;
+            display: block;
+            font-size: 16px;
+            border-radius: 6px;
+            transition: background-color 0.3s ease;
+        }
+
+        .menu-link:hover {
+            background-color: #3e8e41;
+        }
+
+        /* Submenu Hover */
+        .hover-menu {
+            display: none; /* Oculto por padrão */
+            position: absolute;
+            top: 35px;
+            left: 0;
+            background-color: #4caf50;
+            border-radius: 8px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 999;
+            min-width: 180px;
+        }
+
+        .hover-menu .menu-link {
+            padding: 8px 15px;
+            text-decoration: none;
+            color: white;
+            display: block;
+        }
+
+        .hover-menu .menu-link:hover {
+            background-color: #3e8e41;
+        }
+
+        /* Mostrar o submenu ao passar o mouse */
+        .menu-toggle:hover + .hover-menu,
+        .hover-menu:hover {
+            display: block;
+        }
+
+        /* Desabilita o hover se o menu lateral estiver ativo */
+        .sidebar.active ~ .main-content .header-left .hover-menu {
+            display: none !important;
+        }
+
+        /* Conteúdo Principal */
+        .main-content {
+            padding-top: 70px;
+            transition: margin-left 0.3s;
+            margin-left: 0;
+        }
+
+        .main-content.active {
+            margin-left: 220px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div id="sidebar" class="sidebar">
+        <a href="/home" class="menu-link">Resumo Geral</a>
+        <a href="/resumo" class="menu-link">Contas a Pagar</a>
+        <a href="/cartoes" class="menu-link">Cartões de Crédito</a>
+    </div>
+
+    <!-- Conteúdo Principal -->
+    <div class="main-content" id="main-content">
+        <!-- Header -->
+        <header>
+            <div class="header-left">
+                <!-- Botão para expandir o menu -->
+                <button class="menu-toggle" id="menu-toggle">&#9776;</button>
+                <!-- Submenu Hover -->
+                <div class="hover-menu">
+                    <a href="/home" class="menu-link">Resumo Geral</a>
+                    <a href="/resumo" class="menu-link">Contas a Pagar</a>
+                    <a href="/cartoes" class="menu-link">Cartões de Crédito</a>
+                </div>
+                <img src="/static/logo.png" alt="Logo" class="logo">
+                <h1>{{ title }}</h1>
+            </div>
+            <a href="/logout" class="logout-button">Logout</a>
+        </header>
+
+        <!-- Conteúdo -->
+        <main>
+            {% block content %}
+            {% endblock %}
+        </main>
+    </div>
+
+    <!-- Script para Menu -->
+    <script>
+        const menuToggle = document.getElementById('menu-toggle');
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('main-content');
+        const hoverMenu = document.querySelector('.hover-menu');
+
+        // Função para atualizar o estado do hover
+        function atualizarHoverMenu() {
+            if (sidebar.classList.contains('active')) {
+                hoverMenu.style.display = 'none';
+            } else {
+                hoverMenu.style.display = '';
+            }
+        }
+
+        // Função para salvar/ler o estado no localStorage
+        function carregarEstadoMenu() {
+            const estadoMenu = localStorage.getItem('menuExpandido');
+            if (estadoMenu === 'true') {
+                sidebar.classList.add('active');
+                mainContent.classList.add('active');
+                atualizarHoverMenu();
+            }
+        }
+
+        function salvarEstadoMenu() {
+            const menuExpandido = sidebar.classList.contains('active');
+            localStorage.setItem('menuExpandido', menuExpandido);
+        }
+
+        // Evento para expandir/recolher o menu
+        menuToggle.addEventListener('click', function () {
+            sidebar.classList.toggle('active');
+            mainContent.classList.toggle('active');
+            atualizarHoverMenu();
+            salvarEstadoMenu();
+        });
+
+        // Carregar o estado salvo no localStorage
+        document.addEventListener('DOMContentLoaded', carregarEstadoMenu);
+    </script>
+</body>
+</html>
