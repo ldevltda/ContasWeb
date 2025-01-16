@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="editar-fatura">
+    <h2>Editar Fatura</h2>
+    <form method="POST" action="/editar_fatura/{{ fatura['id'] }}">
+        <!-- Campo oculto para enviar o cartao_id -->
+        <input type="hidden" name="cartao_id" value="{{ fatura['cartao_id'] }}">
+
+        <div class="form-group">
+            <label for="dia_vencimento">Dia de Vencimento:</label>
+            <input type="number" id="dia_vencimento" name="dia_vencimento" value="{{ fatura['dia_vencimento'] }}" required>
+        </div>
+        <div class="form-group">
+            <label for="valor">Valor:</label>
+            <input type="number" id="valor" name="valor" step="0.01" value="{{ fatura['valor'] }}" required>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="button primary">Salvar</button>
+            <a href="/faturas/{{ fatura['cartao_id'] }}" class="button secondary">Cancelar</a>
+        </div>
+    </form>
+</section>
+{% endblock %}

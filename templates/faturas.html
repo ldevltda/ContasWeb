@@ -21,9 +21,10 @@
     </div>
 </section>
 
-<!-- Botão Inserir Fatura -->
-<div class="button-container">
-    <a href="/incluir_fatura/{{ cartao_id }}" class="button">Inserir Fatura</a>
+<!-- Botões centralizados -->
+<div class="button-container" style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px;">
+    <a href="/incluir_fatura/{{ cartao_id }}" class="button">Incluir Fatura</a>
+    <a href="/cartoes" class="button secondary">Voltar</a>
 </div>
 
 <!-- Tabela de Faturas -->
@@ -31,6 +32,8 @@
     <table>
         <thead>
             <tr>
+                <th></th>
+                <th></th>
                 <th>Mês</th>
                 <th>Ano</th>
                 <th>Dia de Vencimento</th>
@@ -40,6 +43,12 @@
         <tbody>
             {% for fatura in faturas %}
             <tr>
+                <td class="icon-column">
+                    <a href="/editar_fatura/{{ fatura['id'] }}" class="icon">✏️</a>
+                </td>
+                <td class="icon-column">
+                    <a href="/confirmar_exclusao/{{ fatura['id'] }}" class="icon">🗑️</a>
+                </td>
                 <td>{{ fatura['mes'] }}</td>
                 <td>{{ fatura['ano'] }}</td>
                 <td>{{ fatura['dia_vencimento'] }}</td>

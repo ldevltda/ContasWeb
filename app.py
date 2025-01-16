@@ -4,6 +4,7 @@ import sqlite3
 import bcrypt
 import re
 
+
 app = Flask(__name__)
 app.secret_key = 'sua_chave_secreta_para_sessoes'
 
@@ -372,7 +373,6 @@ def faturas(cartao_id):
     cursor = conn.cursor()
 
     try:
-        # Buscar nome e limite do cartão
         cursor.execute('SELECT nome, limite_total FROM cartoes_credito WHERE id = ?', (cartao_id,))
         cartao = cursor.fetchone()
         if not cartao:
@@ -381,7 +381,6 @@ def faturas(cartao_id):
         nome_cartao = cartao['nome']
         limite_total = cartao['limite_total']
 
-        # Buscar faturas do cartão
         cursor.execute('SELECT * FROM fatura WHERE cartao_id = ?', (cartao_id,))
         faturas = cursor.fetchall()
 
@@ -399,7 +398,46 @@ def faturas(cartao_id):
         conn.close()
 
 
-from datetime import date
+@app.route('/editar_fatura/<int:fatura_id>', methods=['GET', 'POST'])
+def editar_fatura(fatura_id):
+    if 'usuario_id' not in session:
+        return redirect('/')
+
+    conn = db_connection()
+    cursor = conn.cursor()
+
+    if request.method == 'POST':
+        dia_vencimento = request.form.get('dia_vencimento')
+        valor = request.form.get('valor')
+        cartao_id = request.form.get('cartao_id')  # Certifique-se de enviar o cartao_id no formulário
+
+        try:
+            cursor.execute(
+                '''
+                UPDATE fatura
+                SET dia_vencimento = ?, valor = ?
+                WHERE id = ?
+                ''',
+                (dia_vencimento, valor, fatura_id)
+            )
+            conn.commit()
+            return redirect(url_for('faturas', cartao_id=cartao_id))
+        except Exception as e:
+            conn.rollback()
+            return f"Erro ao editar fatura: {e}"
+        finally:
+            conn.close()
+
+    try:
+        cursor.execute('SELECT * FROM fatura WHERE id = ?', (fatura_id,))
+        fatura = cursor.fetchone()
+        if not fatura:
+            return "Fatura não encontrada.", 404
+
+        return render_template('editar_fatura.html', fatura=fatura)
+    finally:
+        conn.close()
+
 
 @app.route('/incluir_fatura/<int:cartao_id>', methods=['GET', 'POST'])
 def incluir_fatura(cartao_id):
